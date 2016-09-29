@@ -48,14 +48,16 @@ phylolm <- function(formula, data=list(), phy,
   ## preparing for OU model
   if (model %in% OU) {
     D = numeric(n)
-    if (!is.ultrametric(phy)) flag = 1
-    dis = pruningwise.distFromRoot(phy)
-    Tmax = max(dis[1:n])
-    D = Tmax - dis[1:n]
-    D = D - mean(D)
-    phy$edge.length[externalEdge] <- phy$edge.length[externalEdge] + D[des[externalEdge]]
-    ## phy is now ultrametric, with height Tmax:
-    Tmax = Tmax + min(D)
+    if (!is.ultrametric(phy)) {
+      flag = 1
+      dis = pruningwise.distFromRoot(phy)
+      Tmax = max(dis[1:n])
+      D = Tmax - dis[1:n]
+      D = D - mean(D)
+      phy$edge.length[externalEdge] <- phy$edge.length[externalEdge] + D[des[externalEdge]]
+      ## phy is now ultrametric, with height Tmax:
+      Tmax = Tmax + min(D)
+    }
   }
 	
   ## preparing for trend model
@@ -168,7 +170,7 @@ phylolm <- function(formula, data=list(), phy,
                     logLik=-BMest$n2llh/2, p=1+d, aic=2*(1+d)+BMest$n2llh, vcov = BMest$vcov)
   } else {
     ##------- Optimization of phylogenetic correlation parameter is needed ---------#
-    # firts: checks of bounds
+    # first: checks of bounds
     if (sum(lower>start)+sum(upper<start)>0 )
       stop("The starting value is not within the bounds of the parameter.")
 
@@ -383,7 +385,7 @@ phylolm <- function(formula, data=list(), phy,
     } # end of loop over bootstrap reps
     # summarize bootstrap estimates
     ind.na <- which(is.na(bootmatrix[,1]))
-    # indices of replicates that failed: phyloglm had an error
+    # indices of replicates that failed: phylolm had an error
     if (length(ind.na)>0) {
       bootmatrix <- bootmatrix[-ind.na,]
       numOnes <- range(apply(booty[,ind.na],2,sum))
